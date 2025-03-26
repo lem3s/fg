@@ -74,3 +74,12 @@ Todos os processos serão executados em segundo plano. A CLI e a GUI fornecerão
   
 ### 3. **Monitoramento e Logs**
 - O sistema deve ser capaz de registrar logs detalhados de cada processo em execução, com suporte para consulta através da CLI e GUI.
+
+
+## Separação das features
+- Guilherme: GUI e Logs
+- Gustavo: Uninstall e List
+- Marcos: Version e Stop
+- Yasmin: Config e Flags
+- Lemes: Install e Update
+- Victor: Watcher e Start
