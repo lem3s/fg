@@ -83,3 +83,12 @@ Todos os processos serão executados em segundo plano. A CLI e a GUI fornecerão
 - Yasmin: Config e Flags
 - Lemes: Install e Update
 - Victor: Watcher e Start
+
+## Etapas
+
+### Etapa 01: 27/03 - 15/04
+- GUI
+- Watcher
+- List
+- Config
+- Install
