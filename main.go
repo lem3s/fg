@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"module/common/services"
+)
 
 func main() {
-	fmt.Println("começa aqui")
+	fmt.Println("comeca aqui")
+	services.Start()
+	fmt.Println("termina aqui")
 }
