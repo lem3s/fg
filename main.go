@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"module/common/services"
 )
 
 func main() {
-	fmt.Println("comeca aqui")
-	services.Start()
-	fmt.Println("termina aqui")
+	services.Start("ExternalApp-0.0.1-SNAPSHOT.jar")
 }
