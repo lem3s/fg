@@ -1,12 +1,5 @@
-import React, { useState } from "react";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from "@/components/ui/command";
+import { useState } from "react";
+import { Command, CommandInput } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -22,9 +15,9 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-function App() {
+export default function App() {
   const [commandInput, setCommandInput] = useState("");
-  const [commandHistory, setCommandHistory] = useState([]);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [output, setOutput] = useState("");
 
   const commonCommands = [
@@ -49,7 +42,7 @@ function App() {
     setCommandInput("");
   };
 
-  const selectCommand = (cmd) => {
+  const selectCommand = (cmd: string) => {
     setCommandInput(cmd);
   };
 
@@ -175,7 +168,7 @@ function App() {
                       placeholder="Digite um comando..."
                       value={commandInput}
                       onValueChange={setCommandInput}
-                      onKeyDown={(e) => {
+                      onKeyDown={(e: React.KeyboardEvent) => {
                         if (e.key === "Enter") {
                           executeCommand();
                         }
@@ -222,5 +215,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
