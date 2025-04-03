@@ -2,7 +2,6 @@ package services
 
 import (
 	"log"
-	"module/common/watcher"
 	"os"
 	"os/exec"
 )
@@ -31,12 +30,10 @@ func Start(jarfile string) {
 	}
 	pid := cmd.Process.Pid
 	log.Printf("Started Java process with PID: %d", pid)
-	w := watcher.NewWatcher(pid)
-	if err := w.Watch(); err != nil {
-		log.Fatal("Error watching process:", err)
-	}
-
-	err = cmd.Wait()
+	//w := watcher.NewWatcher(pid)
+	// if err := w.Watch(); err != nil {
+	// 	log.Fatal("Error watching process:", err)
+	// }
 
 	if err != nil {
 		log.Fatal("Error running JAR file:", err)
