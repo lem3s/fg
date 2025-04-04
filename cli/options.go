@@ -2,11 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"module/common"
+	"github.com/lem3s/fg/common"
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "fg",
 	Short: "A tool for managing and running the FHIR Guard application",
 	Long: `This cli application provides a consistent and easy-to-use interface
@@ -41,6 +41,6 @@ var configCmd = &cobra.Command{
 }
 
 func Execute() error {
-	rootCmd.AddCommand(configCmd)
-	return rootCmd.Execute()
+	RootCmd.AddCommand(configCmd)
+	return RootCmd.Execute()
 }
