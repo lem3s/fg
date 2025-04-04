@@ -1,7 +1,7 @@
 package main
 
 import (
-	"module/common/services"
+	"github.com/lem3s/fg/common/services"
 )
 
 func main() {
