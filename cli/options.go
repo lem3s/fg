@@ -2,13 +2,17 @@ package cli
 
 import (
 	"fmt"
-	"module/common"
+	"github.com/lem3s/fg/common"
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "fg",
-	Short: "base of cli",
+	Short: "A tool for managing and running the FHIR Guard application",
+	Long: `This cli application provides a consistent and easy-to-use interface
+	 for installing, updating, starting, stopping, and monitoring different versions
+	 of the FHIR Guard application. By default, fg operates in CLI mode, but a 
+	 graphical interface can be launched by using the gui command.`,
 }
 
 var configCmd = &cobra.Command{
@@ -37,6 +41,6 @@ var configCmd = &cobra.Command{
 }
 
 func Execute() error {
-	rootCmd.AddCommand(configCmd)
-	return rootCmd.Execute()
+	RootCmd.AddCommand(configCmd)
+	return RootCmd.Execute()
 }
