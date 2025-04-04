@@ -1,4 +1,4 @@
-module module
+module github.com/lem3s/fg
 
 go 1.23.4
 
