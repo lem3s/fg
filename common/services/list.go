@@ -1,3 +1,4 @@
+// common/services/list.go
 package services
 
 import (
@@ -6,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 type VersionInfo struct {
@@ -22,11 +25,13 @@ type VersionSystem struct {
 	UpdateAvailable   bool          `json:"update_available"`
 }
 
+
 func ListVersions() {
 	versionSystem := getMockVersionData()
-
+	
 	displayVersionInfo(versionSystem)
 }
+
 
 func ListVersionsFromFile(filePath string) error {
 	_, err := os.Stat(filePath)
@@ -47,15 +52,6 @@ func ListVersionsFromFile(filePath string) error {
 	
 	displayVersionInfo(versionSystem)
 	return nil
-}
-
-func GetMockVersionsJSON() string {
-	versionSystem := getMockVersionData()
-	jsonBytes, err := json.MarshalIndent(versionSystem, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("Erro ao gerar JSON: %v", err)
-	}
-	return string(jsonBytes)
 }
 
 func getMockVersionData() VersionSystem {
@@ -94,36 +90,27 @@ func getMockVersionData() VersionSystem {
 	}
 }
 
-
 func displayVersionInfo(vs VersionSystem) {
 	fmt.Printf("=== Informações de Versão para %s ===\n\n", vs.AppName)
-	
-	fmt.Printf("Versão atual: ")
-	for _, v := range vs.InstalledVersions {
-		if v.IsActive {
-			fmt.Printf("%s (instalada em %s)\n", v.Version, v.InstallDate.Format("02/01/2006"))
-			break
-		}
-	}
-	
-	fmt.Printf("Última versão disponível: %s\n", vs.LatestVersion)
-	
-	if vs.UpdateAvailable {
-		fmt.Println("Status: Atualização disponível!")
-	} else {
-		fmt.Println("Status: Sistema atualizado")
-	}
-	
-	fmt.Println("\nHistórico de versões instaladas:")
 	
 	sort.Slice(vs.InstalledVersions, func(i, j int) bool {
 		return vs.InstalledVersions[i].InstallDate.After(vs.InstalledVersions[j].InstallDate)
 	})
 	
+	versionAtualExibida := false
+	
+	fmt.Println("Histórico de versões instaladas:")
+	
 	for i, v := range vs.InstalledVersions {
 		status := "inativa"
 		if v.IsActive {
 			status = "ATIVA"
+			
+			if !versionAtualExibida {
+				fmt.Printf("\nVersão atual: %s (instalada em %s)\n", 
+					v.Version, v.InstallDate.Format("02/01/2006"))
+				versionAtualExibida = true
+			}
 		}
 		
 		fmt.Printf("%d. Versão %s - %s (Status: %s)\n", 
@@ -133,4 +120,43 @@ func displayVersionInfo(vs VersionSystem) {
 			fmt.Printf("   Componentes: %v\n", v.Components)
 		}
 	}
+	
+	if !versionAtualExibida {
+		fmt.Println("\nVersão atual: Nenhuma versão ativa encontrada")
+	}
+	
+	fmt.Printf("\nÚltima versão disponível: %s\n", vs.LatestVersion)
+	
+	if vs.UpdateAvailable {
+		fmt.Println("Status: Atualização disponível!")
+	} else {
+		fmt.Println("Status: Sistema atualizado")
+	}
+}
+
+var ListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "Lista todas as versões instaladas do aplicativo",
+	Long: `O comando 'list' exibe um histórico completo de todas as versões 
+instaladas, destacando qual está ativa atualmente e se há atualizações disponíveis.
+
+Por exemplo:
+  fg version list
+  fg version list --file=config.json`,
+	Run: func(cmd *cobra.Command, args []string) {
+		filePath, _ := cmd.Flags().GetString("file")
+		
+		if filePath != "" {
+			err := ListVersionsFromFile(filePath)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			ListVersions()
+		}
+	},
+}
+
+func init() {
+	ListCmd.Flags().StringP("file", "f", "", "Caminho para um arquivo JSON com dados de versão")
 }
