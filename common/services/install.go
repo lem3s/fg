@@ -1,14 +1,8 @@
 package services
 
 import (
-	"github.com/lem3s/fg/cli"
-
 	"github.com/spf13/cobra"
 )
-
-func init() {
-	cli.RootCmd.AddCommand(installCmd)
-}
 
 var installCmd = &cobra.Command{
 	Use:   "install",

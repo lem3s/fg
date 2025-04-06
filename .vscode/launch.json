@@ -8,7 +8,7 @@
             "mode": "debug",
             "program": "${workspaceFolder}",
             "buildFlags": "-gcflags \"all=-N -l\"",
-            "args": [],
+            "args": ["start", "ExternalApp-0.0.1-SNAPSHOT.jar"],
             "env": {},
             "showLog": true
         }
