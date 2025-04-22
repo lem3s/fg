@@ -1,6 +1,7 @@
 package install
 
 import (
+	"fmt"
 	"github.com/lem3s/fg/cli"
 
 	"github.com/spf13/cobra"
@@ -18,4 +19,5 @@ var installCmd = &cobra.Command{
 }
 
 func install(cmd *cobra.Command, args []string) {
+	fmt.Printf("testando install")
 }

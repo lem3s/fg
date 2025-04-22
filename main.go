@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/lem3s/fg/cli"
 
 func main() {
-	fmt.Println("começa aqui")
+	cli.Execute()
 }

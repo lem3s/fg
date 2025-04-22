@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"os"
 	"fmt"
 	"github.com/lem3s/fg/common"
 	"github.com/spf13/cobra"
@@ -40,7 +41,9 @@ var configCmd = &cobra.Command{
 	},
 }
 
-func Execute() error {
-	RootCmd.AddCommand(configCmd)
-	return RootCmd.Execute()
+func Execute() {
+	err := RootCmd.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
 }
