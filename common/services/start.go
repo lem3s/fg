@@ -11,6 +11,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type CacheConfig struct {
+	Pid     int    `yaml:"pid"`
+	Jarfile string `yaml:"jarfile"`
+	Status  string `yaml:"status"`
+	Port    int    `yaml:"port"`
+	Host    string `yaml:"host"`
+	Uptime  int    `yaml:"uptime"`
+}
+
 var StartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the FHIR Guard application",
@@ -42,12 +51,14 @@ func start(jarfile string) {
 	log.Printf("Absolute path of JAR file: %s", jarfile)
 	port := findAvailablePort(8080)
 	portStr := fmt.Sprintf("--server.port=%d", port)
+
 	cmd := exec.Command("java", "-jar", jarfile, portStr)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
 		log.Fatal("Error starting JAR file:", err)
 	}
+
 	pid := cmd.Process.Pid
 	log.Printf("Started Java process with PID: %d", pid)
 
@@ -58,13 +69,6 @@ func start(jarfile string) {
 	}
 
 	yaml.Unmarshal(yamlFile, &cacheConfig)
-
-	cacheConfig["pid"] = pid
-	cacheConfig["jarfile"] = jarfile
-	cacheConfig["status"] = "running"
-	cacheConfig["port"] = 8080
-	cacheConfig["host"] = "localhost"
-	cacheConfig["uptime"] = 0
 
 	yamlData, err := yaml.Marshal(cacheConfig)
 
