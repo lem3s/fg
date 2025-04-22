@@ -1,4 +1,3 @@
-// common/services/list.go
 package services
 
 import (
