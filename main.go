@@ -27,13 +27,13 @@ da aplicação, incluindo listar, instalar ou desinstalar versões.`,
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	
+
 	versionCmd.AddCommand(services.ListCmd)
 }
 
 func main() {
 	fmt.Println("Gerenciador de Versões - Iniciando...")
-	
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
