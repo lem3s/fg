@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lem3s/fg/common"
 	"github.com/lem3s/fg/common/services"
 
 	"github.com/spf13/cobra"
@@ -27,13 +28,15 @@ da aplicação, incluindo listar, instalar ou desinstalar versões.`,
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	
+
 	versionCmd.AddCommand(services.ListCmd)
+
+	rootCmd.AddCommand(common.ConfigCmd)
 }
 
 func main() {
 	fmt.Println("Gerenciador de Versões - Iniciando...")
-	
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
