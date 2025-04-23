@@ -2,7 +2,9 @@ package cli
 
 import (
 	"fmt"
+
 	"github.com/lem3s/fg/common"
+	"github.com/lem3s/fg/common/services"
 	"github.com/spf13/cobra"
 )
 
@@ -42,5 +44,6 @@ var configCmd = &cobra.Command{
 
 func Execute() error {
 	RootCmd.AddCommand(configCmd)
+	RootCmd.AddCommand(services.StartCmd)
 	return RootCmd.Execute()
 }
