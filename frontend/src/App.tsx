@@ -150,7 +150,7 @@ export default function TerminalGUI() {
                 </div>
               ))}
               <div className="flex items-center">
-                <span className="mr-2 text-green-400">{currentDirectory}></span>
+                <span className="mr-2 text-green-400">{currentDirectory}</span>
                 <input
                   ref={inputRef}
                   type="text"
