@@ -9,19 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetFgHome() string {
+func GetFgHome() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		if tempDir, err := os.MkdirTemp("", "fg"); err == nil {
-			return tempDir
-		}
-		return filepath.Join(os.TempDir(), "fg")
+		return "", fmt.Errorf("não foi possível determinar o diretório home: %v", err)
 	}
-	return filepath.Join(homeDir, ".fg")
+	return filepath.Join(homeDir, ".fg"), nil
 }
 
 func ValidateVersionPath(version string) (string, error) {
-	fgHome := GetFgHome()
+	fgHome, err := GetFgHome()
+	if err != nil {
+		return "", err
+	}
 
 	if _, err := os.Stat(fgHome); os.IsNotExist(err) {
 		return "", fmt.Errorf("nenhuma versão instalada. Diretório principal não existe")
@@ -30,7 +30,7 @@ func ValidateVersionPath(version string) (string, error) {
 	version = strings.TrimSpace(version)
 	versionPath := filepath.Join(fgHome, version)
 	
-	_, err := os.Stat(versionPath)
+	_, err = os.Stat(versionPath)
 	if os.IsNotExist(err) {
 		entries, err := os.ReadDir(fgHome)
 		if err != nil {
@@ -92,8 +92,16 @@ func UninstallVersion(version string) error {
 	var response string
 	fmt.Scanln(&response)
 	response = strings.ToLower(strings.TrimSpace(response))
+
+	positiveResponses := map[string]bool{
+		"s":   true,
+		"sim": true,
+		"y":   true,
+		"yes": true,
+		"si":  true,
+	}
 	
-	if response != "s" && response != "sim" && response != "y" && response != "yes" {
+	if !positiveResponses[response] {
 		fmt.Println("Desinstalação cancelada.")
 		return nil
 	}
