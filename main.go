@@ -37,6 +37,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	versionCmd.AddCommand(services.ListCmd)
+	versionCmd.AddCommand(services.UninstallCmd)
 }
 
 func main() {
