@@ -53,25 +53,25 @@ func displayConfigInfo(data Configuration) {
 		data.Host, data.Port, data.LogLevel, data.Debug, data.DataDir, data.MaxMemory, data.MaxCPU, data.Workers)
 }
 
+func runConfigCmd(cmd *cobra.Command, args []string) {
+	data, err := os.ReadFile("config.yaml")
+	if err != nil {
+		fmt.Println("Erro ao ler o arquivo YAML:", err)
+	}
+	var config Configuration
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		fmt.Println("Erro ao parsear o YAML:", err)
+		return
+	}
+	displayConfigInfo(config)
+}
+
 var ConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Exibe as configurações disponibilizadas pela máquina para a aplicação",
 	Long: `O comando 'config' exibe as configurações de servidor e recursos oferecidos 
 			pela máquina para a execução da aplicação`,
 
-	Run: func(cmd *cobra.Command, args []string) {
-		data, err := os.ReadFile("config.yaml")
-		if err != nil {
-			fmt.Println("Erro ao ler o arquivo YAML:", err)
-		} else {
-			var config Configuration
-			err = yaml.Unmarshal(data, &config)
-			if err != nil {
-				fmt.Println("Erro ao parsear o YAML:", err)
-				return
-			}
-
-			displayConfigInfo(config)
-		}
-	},
+	Run: runConfigCmd,
 }

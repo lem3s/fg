@@ -8,8 +8,9 @@ import (
 	"github.com/lem3s/fg/common"
 	"github.com/lem3s/fg/common/services"
 
+	"embed"
+
 	"github.com/spf13/cobra"
-  "embed"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -30,8 +31,7 @@ var versionCmd = &cobra.Command{
 	Long: `O comando 'version' permite gerenciar as versões 
 da aplicação, incluindo listar, instalar ou desinstalar versões.`,
 }
-    
-//go:embed all:frontend/dist
+
 var assets embed.FS
 
 func init() {
@@ -44,8 +44,8 @@ func init() {
 
 func main() {
 	fmt.Println("Gerenciador de Versões - Iniciando...")
-  
-  // Create an instance of the app structure
+
+	// Create an instance of the app structure
 	app := NewApp()
 
 	// Create application with options
@@ -65,7 +65,7 @@ func main() {
 
 	if err != nil {
 		println("Error:", err.Error())
-  }
+	}
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
