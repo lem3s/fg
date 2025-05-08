@@ -1,10 +1,10 @@
-package watcher
+package app
 
 import (
 	"fmt"
 	"os"
-	"time"
 	"syscall"
+	"time"
 )
 
 type ProcessWatcher struct {

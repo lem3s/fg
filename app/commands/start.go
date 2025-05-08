@@ -1,4 +1,4 @@
-package services
+package commands
 
 import (
 	"fmt"
@@ -7,32 +7,29 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/spf13/cobra"
+	"github.com/lem3s/fg/app/cmd"
 	"gopkg.in/yaml.v3"
 )
 
-type CacheConfig struct {
-	Pid     int    `yaml:"pid"`
-	Jarfile string `yaml:"jarfile"`
-	Status  string `yaml:"status"`
-	Port    int    `yaml:"port"`
-	Host    string `yaml:"host"`
-	Uptime  int    `yaml:"uptime"`
+type StartCmd struct {
+	Ctx *cmd.AppContext
 }
 
-var StartCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start the FHIR Guard application",
-	Long:  `Example: fg start <jarfile>`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			fmt.Println("Please provide the JAR file to start.")
-			return
-		}
-		jarfile := args[0]
+func (s *StartCmd) Run(args []string) {
+	//validacoes especificas desse fluxo aqui
+	if len(args) < 1 {
+		fmt.Println("Please provide the JAR file to start.")
+		return
+	}
+	jarfile := args[0]
 
-		start(jarfile)
-	},
+	start(jarfile)
+}
+
+func init() {
+	cmd.Register("start", func(ctx *cmd.AppContext) cmd.Command {
+		return &StartCmd{Ctx: ctx}
+	})
 }
 
 func start(jarfile string) {
