@@ -4,6 +4,58 @@
 
 Este sistema permite que você gerencie e interaja com processos em segundo plano por meio de uma interface de linha de comando (CLI) e de uma interface gráfica de usuário (GUI). Ele inclui funcionalidades para gerenciar a versão, instalar, atualizar e desinstalar pacotes, bem como iniciar, parar, monitorar e obter logs de processos. A aplicação é construída em Go e usa bibliotecas como `cobra`, `formatador de output`, e `gui`.
 
+## Arquitetura
+
+```mermaid
+---
+config:
+  layout: fixed
+---
+flowchart TD
+ subgraph Infos["Infos"]
+        A1["🔵 De azul as funcionalidades que são em runtime do app"]
+        A2["🟠 De laranja as funcionalidades que <strong>não<strong> são em runtime do app"]
+        A3["⚫ De cinza os componentes que não são funcionalidades"]
+  end
+    GUI["GUI"]
+    GUI_Service["GUI Service"]
+    CLI["CLI"]
+    Install["🟠 Install [version] <br> João Victor Lemes"]
+    Update["🟠 Update // Setar default? <br> Lemes"]
+    Uninstall["🟠 Uninstall [version] <br> Gustavo"]
+    List["🟠 List <br> Gustavo"]
+    Available["🟠 Available"]
+    Config["🟠 Config [version] <br> Yasmin"]
+    Version["🟠 --version <br> Marcos"]
+    Start["🔵 Start [version] <br> Victor"]
+    Stop["🔵 Stop [pid] <br> Marcos"]
+    Status["🔵 Status"]
+    Logs["🔵 Logs [pid] <br> Guilherme"]
+    Repo["Repo das versões (Github)"]
+    Parsing["⚫ Parsing"]
+    CurrentVersion["⚫ Gerenciador de Versão atual"]
+    Watcher["⚫ Watcher <br> Victor"]
+    EnvVars["⚫ Variáveis de ambiente"]
+    Flags["⚫ Flags <br> Yasmin"]
+    GetDirModule["⚫ Get Dir Module"]
+
+    GUI --> GUI_Service
+    CLI --> Install & Update & Uninstall & List & Available & Config & Version & Start & Stop & Status & Logs
+    GUI_Service --> Install & Update & Uninstall & List & Available & Config & Version & Start & Stop & Status & Logs
+    Install --> Repo
+    Update --> Install & Repo & CurrentVersion & GetDirModule
+    Uninstall --> GetDirModule & Watcher
+    List --> GetDirModule
+    Available --> Repo
+    Config --> GetDirModule & CurrentVersion
+    Version --> CurrentVersion
+    Start --> EnvVars & Watcher & CurrentVersion
+    Stop --> Watcher
+    Status --> Watcher
+    Logs --> Watcher
+    GetDirModule --> EnvVars & Flags
+```
+
 ## Estrutura do Projeto
 
 ### 1. **Pacotes**
