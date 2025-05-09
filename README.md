@@ -56,6 +56,10 @@ flowchart TD
     GetDirModule --> EnvVars & Flags
 ```
 
+Os módulos que são consumidos pela CLI e pelo GUI service devem ser "interface agnósticos". Ou seja, não devem ter funcionalidades de I/O. Tal caracterítica será delegada para os módulos CLI e GUI.
+
+Os módulos de funcionalidade conterão apenas a lógica de funcionamento interna.
+
 ## Estrutura do Projeto
 
 ### 1. **Pacotes**
