@@ -5,7 +5,7 @@ import (
 )
 
 type Command interface {
-    Run(args []string)
+    Run(args []string) error
 }
 
 type CommandFactory func(ctx *AppContext) Command

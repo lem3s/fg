@@ -18,14 +18,20 @@ func main() {
 	commandName := os.Args[1]
 	args := os.Args[2:]
 
+	//carrega as configurações do arquivo config.yaml
 	cfg := app.GetConfig()
+
+	//cria o contexto de configuração da aplicação
 	ctx := cmd.NewAppContext(cfg)
 
+	//cria o comando a partir do nome e do contexto
+	//se o comando não existir, retorna erro
 	command, err := cmd.CreateCommand(commandName, ctx)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	//executa o comando com os argumentos
 	command.Run(args)
 }

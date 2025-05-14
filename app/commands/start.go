@@ -15,15 +15,14 @@ type StartCmd struct {
 	Ctx *cmd.AppContext
 }
 
-func (s *StartCmd) Run(args []string) {
-	//validacoes especificas desse fluxo aqui
+func (s *StartCmd) Run(args []string) error {
 	if len(args) < 1 {
-		fmt.Println("Please provide the JAR file to start.")
-		return
+		return fmt.Errorf("missing JAR file argument")
 	}
 	jarfile := args[0]
 
 	start(jarfile)
+	return nil
 }
 
 func init() {

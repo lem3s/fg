@@ -8,9 +8,10 @@ type InstallCmd struct {
 	Ctx *cmd.AppContext
 }
 
-func (h *InstallCmd) Run(args []string) {
+func (h *InstallCmd) Run(args []string) error {
 	h.Ctx.Config.Set("jar", "teste")
 	h.Ctx.Config.WriteConfig()
+	return nil
 }
 
 func init() {

@@ -11,7 +11,7 @@ type ListCmd struct {
     Ctx *cmd.AppContext
 }
 
-func(h *ListCmd) Run(args []string) {
+func(h *ListCmd) Run(args []string) error {
 	//validacoes especificas para o comando
     path := h.Ctx.Config.GetString("jar")
     if path == "" && len(args) > 0 {
@@ -23,6 +23,7 @@ func(h *ListCmd) Run(args []string) {
 
 	//ListVersionsFromFile(nome)
     fmt.Printf("%s!\n", path)
+	return nil
 }
 
 func init() {

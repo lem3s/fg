@@ -1,8 +1,0 @@
-Host: 0.0.0.0
-Port: 1010
-LogLevel: null  
-Debug: false
-DataDir: null 
-MaxMemory: 1024
-MaxCPU: 2
-Workers: 10
