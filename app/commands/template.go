@@ -11,8 +11,8 @@ type HelloCommand struct {
 }
 
 func (h *HelloCommand) Run(args []string) error {
-	nome := h.Ctx.Config.GetString("nome")
-	fmt.Printf("Olá, %s!\n", nome)
+	//aqui você retornaria uma info para o usuario
+	h.Ctx.Interactor.Info(fmt.Sprintf("Hello %s!", h.Ctx.Config.GetString("jar")))
 	return nil
 }
 
