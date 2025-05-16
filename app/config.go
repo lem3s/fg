@@ -1,8 +1,11 @@
 package app
 
 import (
+	"errors"
+	"log"
 	"sync"
 
+	"github.com/lem3s/fg/app/cmd"
 	"github.com/spf13/viper"
 )
 
@@ -14,15 +17,21 @@ func GetConfig() *viper.Viper {
 		v := viper.New()
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
-		v.AddConfigPath(".") //aqui trabalharemos com o dir do FG, sendo o default home/.fg
+		v.AddConfigPath(cmd.GetFgHome()) //aqui trabalharemos com o dir do FG, sendo o default home/.fg
 		v.AutomaticEnv()
 
 		err := v.ReadInConfig()
 		if err != nil {
-			panic("Erro ao ler config: " + err.Error())
+			var configFileNotFoundError viper.ConfigFileNotFoundError
+			if errors.As(err, &configFileNotFoundError) {
+				return
+			}
+			log.Fatalf("Error reading config: %s\n", err)
+			return
 		}
 
 		cfg = v
 	})
+
 	return cfg
 }

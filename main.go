@@ -7,6 +7,7 @@ import (
 	"github.com/lem3s/fg/app"
 	"github.com/lem3s/fg/app/cmd"
 	_ "github.com/lem3s/fg/app/commands" // Importa todos os comandos para registro
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -18,11 +19,14 @@ func main() {
 	commandName := os.Args[1]
 	args := os.Args[2:]
 
+	var cfg *viper.Viper
 	//carrega as configurações do arquivo config.yaml
-	cfg := app.GetConfig()
+	if (cmd.IsVersionDeppendant(commandName)) {
+		cfg = app.GetConfig()
+	}
 
 	//cria o contexto de configuração da aplicação
-	ctx := cmd.NewAppContext(cfg)
+	ctx := cmd.NewAppContext(cfg, cmd.GetFgHome(), cmd.GetLogLevel())
 
 	//cria o comando a partir do nome e do contexto
 	//se o comando não existir, retorna erro
