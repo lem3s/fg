@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"slices"
+
 	"github.com/lem3s/fg/app/logger"
 	"github.com/spf13/viper"
 )
@@ -15,13 +17,18 @@ type InteractionHandler interface {
 
 type AppContext struct {
 	Config         *viper.Viper
+	FgHome         string
+	LogLevel       string
 	Interactor     InteractionHandler
 	SuccessMessage string
 }
 
-func NewAppContext(cfg *viper.Viper) *AppContext {
-	return &AppContext{
-		Config:     cfg,
-		Interactor: &logger.DefaultInteractionHandler{},
-	}
+func NewAppContext(cfg *viper.Viper, FgHome string, LogLevel string) *AppContext {
+	return &AppContext{Config: cfg, FgHome: FgHome, LogLevel: LogLevel, Interactor: &logger.DefaultInteractionHandler{}}
+}
+
+func IsVersionDeppendant(commandName string) bool {
+	versionDeppendantCommands := []string{"install", "uninstall", "config", "start"}
+
+	return slices.Contains(versionDeppendantCommands, commandName)
 }
