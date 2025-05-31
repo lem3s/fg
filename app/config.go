@@ -17,21 +17,44 @@ func GetConfig() *viper.Viper {
 		v := viper.New()
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
-		v.AddConfigPath(cmd.GetFgHome()) //aqui trabalharemos com o dir do FG, sendo o default home/.fg
+		v.AddConfigPath(cmd.GetFgHome())
 		v.AutomaticEnv()
 
 		err := v.ReadInConfig()
 		if err != nil {
 			var configFileNotFoundError viper.ConfigFileNotFoundError
 			if errors.As(err, &configFileNotFoundError) {
+				log.Println("Arquivo de configuração não encontrado.")
+				cfg = v
 				return
 			}
-			log.Fatalf("Error reading config: %s\n", err)
+			log.Fatalf("Erro ao ler arquivo de configuração: %s\n", err)
 			return
 		}
 
 		cfg = v
 	})
 
+	DisplayConfig()
 	return cfg
+}
+
+func DisplayConfig() {
+	config := GetConfig()
+	if config == nil {
+		log.Println("Nenhuma configuração informada.")
+		return
+	}
+
+	log.Println("Configurações do FG:")
+
+	settings := config.AllSettings()
+
+	for key, value := range settings {
+		if value == nil {
+			log.Printf("%s: <null>\n", key)
+		} else {
+			log.Printf("%s: %v\n", key, value)
+		}
+	}
 }
