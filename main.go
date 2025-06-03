@@ -1,42 +1,31 @@
-// main.go
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/lem3s/fg/common/services"
-
-	"github.com/spf13/cobra"
+	"github.com/lem3s/fg/app"
+	"github.com/lem3s/fg/app/cmd"
+	_ "github.com/lem3s/fg/app/commands" // Importa todos os comandos para registro
+	"github.com/lem3s/fg/app/handlers"
+	"github.com/spf13/viper"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "fg",
-	Short: "Gerenciador de versões para aplicações",
-	Long: `Ferramenta para gerenciar, instalar e listar 
-versões da aplicação. Permite visualizar o histórico de 
-versões instaladas e verificar se há atualizações disponíveis.`,
-}
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Gerencia versões do aplicativo",
-	Long: `O comando 'version' permite gerenciar as versões 
-da aplicação, incluindo listar, instalar ou desinstalar versões.`,
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
-	
-	versionCmd.AddCommand(services.ListCmd)
-	versionCmd.AddCommand(services.UninstallCmd)
-}
-
 func main() {
-	fmt.Println("Gerenciador de Versões - Iniciando...")
-	
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	commandName := os.Args[1]
+	args := os.Args[2:]
+
+	var cfg *viper.Viper
+	//carrega as configurações do arquivo config.yaml
+	if cmd.IsVersionDeppendant(commandName) {
+		cfg = app.GetConfig()
 	}
+
+	//cria o contexto de configuração da aplicação
+	ctx := cmd.NewAppContext(cfg, cmd.GetFgHome(), cmd.GetLogLevel())
+	handlers.HandleParams(args, ctx)
+
+	command, _ := cmd.CreateCommand(commandName, ctx)
+
+	err := command.Run(args)
+	handlers.HandleCallback(err, ctx)
 }
