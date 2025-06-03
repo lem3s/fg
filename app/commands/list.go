@@ -9,14 +9,12 @@ import (
 	"time"
 
 	"github.com/lem3s/fg/app/cmd"
-	"gopkg.in/yaml.v3"
 )
 
 type VersionInfo struct {
 	Version     string    `yaml:"version"`
 	InstallDate time.Time `yaml:"install_date"`
 	IsActive    bool      `yaml:"is_active"`
-	Components  []string  `yaml:"components,omitempty"`
 }
 
 type ListCmd struct {
@@ -61,12 +59,7 @@ func (h *ListCmd) listVersionsFromFgHome(fgHome string) error {
 		}
 
 		versionPath := filepath.Join(fgHome, versionName)
-		versionInfo, err := h.readVersionMetadata(versionPath, versionName)
-		if err != nil {
-			h.Ctx.Interactor.Warn(fmt.Sprintf("Aviso: Não foi possível ler metadados para versão %s: %v", versionName, err))
-			versionInfo = h.createBasicVersionInfo(versionPath, versionName)
-		}
-
+		versionInfo := h.createVersionInfo(versionPath, versionName)
 		versions = append(versions, versionInfo)
 	}
 
@@ -80,28 +73,7 @@ func (h *ListCmd) listVersionsFromFgHome(fgHome string) error {
 	return nil
 }
 
-func (h *ListCmd) readVersionMetadata(versionPath, versionName string) (VersionInfo, error) {
-	configPath := filepath.Join(versionPath, "config.yaml")
-	
-	if _, err := os.Stat(configPath); err != nil {
-		return VersionInfo{}, fmt.Errorf("arquivo config.yaml não encontrado")
-	}
-
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return VersionInfo{}, fmt.Errorf("erro ao ler config.yaml: %v", err)
-	}
-
-	var versionInfo VersionInfo
-	if err := yaml.Unmarshal(data, &versionInfo); err != nil {
-		return VersionInfo{}, fmt.Errorf("erro ao fazer parse do YAML: %v", err)
-	}
-
-	versionInfo.IsActive = false
-	return versionInfo, nil
-}
-
-func (h *ListCmd) createBasicVersionInfo(versionPath, versionName string) VersionInfo {
+func (h *ListCmd) createVersionInfo(versionPath, versionName string) VersionInfo {
 	dirInfo, err := os.Stat(versionPath)
 	installDate := time.Now()
 	if err == nil {
@@ -112,7 +84,6 @@ func (h *ListCmd) createBasicVersionInfo(versionPath, versionName string) Versio
 		Version:     versionName,
 		InstallDate: installDate,
 		IsActive:    false,
-		Components:  []string{"sem metadados"},
 	}
 }
 
@@ -155,10 +126,6 @@ func (h *ListCmd) displayVersionInfo(versions []VersionInfo) {
 		}
 
 		h.Ctx.Interactor.Info(fmt.Sprintf("%d. Versão %s - %s (Status: %s)", i+1, v.Version, v.InstallDate.Format("02/01/2006"), status))
-
-		if len(v.Components) > 0 {
-			h.Ctx.Interactor.Info(fmt.Sprintf("   Componentes: %v", v.Components))
-		}
 	}
 
 	if !versionAtualExibida {

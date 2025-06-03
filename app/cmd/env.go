@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"slices"
 )
 
@@ -14,12 +15,12 @@ func GetFgHome() string {
 		return home
 	}
 
-	home, err := os.UserHomeDir() // valor padrão
+	home, err := os.UserHomeDir() 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return home
+	return filepath.Join(home, ".fg")  // ← MUDE ESTA LINHA
 }
 
 // TODO [Joao]: adicionar a checagem da flag "log-level" quando estiver pronta
