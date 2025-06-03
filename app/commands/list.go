@@ -13,25 +13,10 @@ import (
 )
 
 type VersionInfo struct {
-    Version     string    `yaml:"version"`
-    InstallDate time.Time `yaml:"install_date"`
-    IsActive    bool      `yaml:"is_active"`
-    Components  []string  `yaml:"components,omitempty"`
-}
-
-type VersionSystem struct {
-    AppName           string        `yaml:"app_name"`
-    InstalledVersions []VersionInfo `yaml:"installed_versions"`
-    LatestVersion     string        `yaml:"latest_version"`
-    UpdateAvailable   bool          `yaml:"update_available"`
-}
-
-type VersionMetadata struct {
 	Version     string    `yaml:"version"`
 	InstallDate time.Time `yaml:"install_date"`
 	IsActive    bool      `yaml:"is_active"`
 	Components  []string  `yaml:"components,omitempty"`
-	JarFiles    []string  `yaml:"jar_files,omitempty"`
 }
 
 type ListCmd struct {
@@ -46,7 +31,7 @@ func (h *ListCmd) Run(args []string) error {
 
 	err := h.listVersionsFromFgHome(fgHome)
 	if err != nil {
-		return fmt.Errorf("erro ao listar versões: %v", err)
+		return err
 	}
 
 	return nil
@@ -90,44 +75,30 @@ func (h *ListCmd) listVersionsFromFgHome(fgHome string) error {
 		return nil
 	}
 
-	versionSystem := VersionSystem{
-		AppName:           "FG",
-		InstalledVersions: versions,
-		LatestVersion:     "desconhecida",
-		UpdateAvailable:   false,
-	}
-
-	h.displayVersionInfo(versionSystem)
+	h.setActiveVersion(versions)
+	h.displayVersionInfo(versions)
 	return nil
 }
 
 func (h *ListCmd) readVersionMetadata(versionPath, versionName string) (VersionInfo, error) {
-
-	metadataFiles := []string{".fg.yaml", "metadata.yaml", "config.yaml", "version.yaml"}
-
-	for _, filename := range metadataFiles {
-		metadataPath := filepath.Join(versionPath, filename)
-		if _, err := os.Stat(metadataPath); err == nil {
-			data, err := os.ReadFile(metadataPath)
-			if err != nil {
-				continue
-			}
-
-			var metadata VersionMetadata
-			if err := yaml.Unmarshal(data, &metadata); err != nil {
-				continue
-			}
-
-			return VersionInfo{
-				Version:     metadata.Version,
-				InstallDate: metadata.InstallDate,
-				IsActive:    metadata.IsActive,
-				Components:  metadata.Components,
-			}, nil
-		}
+	configPath := filepath.Join(versionPath, "config.yaml")
+	
+	if _, err := os.Stat(configPath); err != nil {
+		return VersionInfo{}, fmt.Errorf("arquivo config.yaml não encontrado")
 	}
 
-	return VersionInfo{}, fmt.Errorf("nenhum arquivo de metadados encontrado")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return VersionInfo{}, fmt.Errorf("erro ao ler config.yaml: %v", err)
+	}
+
+	var versionInfo VersionInfo
+	if err := yaml.Unmarshal(data, &versionInfo); err != nil {
+		return VersionInfo{}, fmt.Errorf("erro ao fazer parse do YAML: %v", err)
+	}
+
+	versionInfo.IsActive = false
+	return versionInfo, nil
 }
 
 func (h *ListCmd) createBasicVersionInfo(versionPath, versionName string) VersionInfo {
@@ -137,59 +108,53 @@ func (h *ListCmd) createBasicVersionInfo(versionPath, versionName string) Versio
 		installDate = dirInfo.ModTime()
 	}
 
-	jarCount := h.countJarFiles(versionPath)
-	components := []string{}
-	if jarCount > 0 {
-		components = append(components, fmt.Sprintf("%d arquivo(s) JAR", jarCount))
-	}
-
 	return VersionInfo{
 		Version:     versionName,
 		InstallDate: installDate,
-		IsActive:    false, 
-		Components:  components,
+		IsActive:    false,
+		Components:  []string{"sem metadados"},
 	}
 }
 
-func (h *ListCmd) countJarFiles(dirPath string) int {
-	count := 0
-	filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil 
-		}
-		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".jar") {
-			count++
-		}
-		return nil
+func (h *ListCmd) setActiveVersion(versions []VersionInfo) {
+	if len(versions) == 0 {
+		return
+	}
+
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].InstallDate.After(versions[j].InstallDate)
 	})
-	return count
+
+	for i := range versions {
+		versions[i].IsActive = false
+	}
+
+	versions[0].IsActive = true
 }
 
-func (h *ListCmd) displayVersionInfo(vs VersionSystem) {
-	h.Ctx.Interactor.Info(fmt.Sprintf("=== Informações de Versão para %s ===\n", vs.AppName))
+func (h *ListCmd) displayVersionInfo(versions []VersionInfo) {
+	h.Ctx.Interactor.Info("=== Informações das Versões Instaladas ===")
 
-	sort.Slice(vs.InstalledVersions, func(i, j int) bool {
-		return vs.InstalledVersions[i].InstallDate.After(vs.InstalledVersions[j].InstallDate)
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].InstallDate.After(versions[j].InstallDate)
 	})
 
 	versionAtualExibida := false
 
 	h.Ctx.Interactor.Info("Versões instaladas:")
 
-	for i, v := range vs.InstalledVersions {
+	for i, v := range versions {
 		status := "inativa"
 		if v.IsActive {
 			status = "ATIVA"
 
 			if !versionAtualExibida {
-				h.Ctx.Interactor.Info(fmt.Sprintf("\nVersão atual: %s (instalada em %s)",
-					v.Version, v.InstallDate.Format("02/01/2006")))
+				h.Ctx.Interactor.Info(fmt.Sprintf("Versão atual: %s (instalada em %s)", v.Version, v.InstallDate.Format("02/01/2006")))
 				versionAtualExibida = true
 			}
 		}
 
-		h.Ctx.Interactor.Info(fmt.Sprintf("%d. Versão %s - %s (Status: %s)",
-			i+1, v.Version, v.InstallDate.Format("02/01/2006"), status))
+		h.Ctx.Interactor.Info(fmt.Sprintf("%d. Versão %s - %s (Status: %s)", i+1, v.Version, v.InstallDate.Format("02/01/2006"), status))
 
 		if len(v.Components) > 0 {
 			h.Ctx.Interactor.Info(fmt.Sprintf("   Componentes: %v", v.Components))
@@ -197,17 +162,7 @@ func (h *ListCmd) displayVersionInfo(vs VersionSystem) {
 	}
 
 	if !versionAtualExibida {
-		h.Ctx.Interactor.Info("\nVersão atual: Nenhuma versão ativa encontrada")
-	}
-
-	if vs.LatestVersion != "desconhecida" {
-		h.Ctx.Interactor.Info(fmt.Sprintf("\nÚltima versão disponível: %s", vs.LatestVersion))
-
-		if vs.UpdateAvailable {
-			h.Ctx.Interactor.Info("Status: Atualização disponível!")
-		} else {
-			h.Ctx.Interactor.Info("Status: Sistema atualizado")
-		}
+		h.Ctx.Interactor.Info("Versão atual: Nenhuma versão ativa encontrada")
 	}
 }
 
