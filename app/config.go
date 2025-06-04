@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+type ConfigCommand struct {
+	Ctx *cmd.AppContext
+}
+
 var once sync.Once
 var cfg *viper.Viper
 
@@ -57,4 +61,16 @@ func DisplayConfig() {
 			log.Printf("%s: %v\n", key, value)
 		}
 	}
+}
+
+func (h *ConfigCommand) Run(args []string) error {
+	message := "Hello " + h.Ctx.Config.GetString("jar") + "!"
+	h.Ctx.Interactor.Info(message)
+	return nil
+}
+
+func init() {
+	cmd.Register("config", func(ctx *cmd.AppContext) cmd.Command {
+		return &ConfigCommand{Ctx: ctx}
+	})
 }
