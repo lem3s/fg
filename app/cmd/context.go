@@ -16,17 +16,31 @@ type InteractionHandler interface {
 	Error(message string)
 }
 
+type LoggerService interface {
+	Info(message string) error
+	Warn(message string) error
+	Error(message string) error
+}
+
 type AppContext struct {
 	Config         *viper.Viper
 	OS             string
 	FgHome         string
 	LogLevel       string
 	Interactor     InteractionHandler
+	Logger         LoggerService
 	SuccessMessage string
 }
 
 func NewAppContext(cfg *viper.Viper, FgHome string, LogLevel string) *AppContext {
-	return &AppContext{Config: cfg, OS: runtime.GOOS, FgHome: FgHome, LogLevel: LogLevel, Interactor: &logger.DefaultInteractionHandler{}}
+	return &AppContext{
+		Config:     cfg,
+		OS:         runtime.GOOS,
+		FgHome:     FgHome,
+		LogLevel:   LogLevel,
+		Interactor: &logger.DefaultInteractionHandler{},
+		Logger:     logger.NewLoggerService(),
+	}
 }
 
 func IsVersionDeppendant(commandName string) bool {
