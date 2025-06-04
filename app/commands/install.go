@@ -58,7 +58,10 @@ func (h *InstallCmd) Run(args []string) error {
 		}
 	}
 
-	javaExecutablePath, err := searchForJavaExecutable(
+	// TODO [Lemes] : Adicionar arquivo de configuração do FG
+	// e colocar path do executável no arquivo de configuração
+	// para o run não precisar buscar o executável
+	_, err = searchForJavaExecutable(
 		filepath.Join(h.Ctx.FgHome, installVersion, "jdk"),
 		h.Ctx.OS,
 	)
@@ -66,9 +69,32 @@ func (h *InstallCmd) Run(args []string) error {
 		return err
 	}
 
-	fmt.Println(javaExecutablePath)
-
 	// End of JDK install
+
+	// Start of apps install
+
+	for _, app := range versionInfo.Apps {
+		err = createFolder(filepath.Join(h.Ctx.FgHome, installVersion, app.Name))
+		if err != nil {
+			return err
+		}
+
+		for _, dependecyUrl := range app.DependenciesUrl {
+			err = downloadDependecy(dependecyUrl, filepath.Join(h.Ctx.FgHome, installVersion, app.Name))
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, fileUrl := range app.FilesUrl {
+			err = downloadDependecy(fileUrl, filepath.Join(h.Ctx.FgHome, installVersion, app.Name))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// End of apps install
 
 	return nil
 }
@@ -148,4 +174,29 @@ func folderExists(path string) bool {
 		return false
 	}
 	return info.IsDir()
+}
+
+func createFolder(path string) error {
+	return os.MkdirAll(path, 0755)
+}
+
+func getFileName(url string) string {
+	return filepath.Base(url)
+}
+
+func downloadDependecy(url, destinationDirectory string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create(filepath.Join(destinationDirectory, getFileName(url)))
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
