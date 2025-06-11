@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"runtime"
 	"slices"
 
 	"github.com/lem3s/fg/app/logger"
@@ -17,6 +18,7 @@ type InteractionHandler interface {
 
 type AppContext struct {
 	Config         *viper.Viper
+	OS             string
 	FgHome         string
 	LogLevel       string
 	Interactor     InteractionHandler
@@ -24,7 +26,7 @@ type AppContext struct {
 }
 
 func NewAppContext(cfg *viper.Viper, FgHome string, LogLevel string) *AppContext {
-	return &AppContext{Config: cfg, FgHome: FgHome, LogLevel: LogLevel, Interactor: &logger.DefaultInteractionHandler{}}
+	return &AppContext{Config: cfg, OS: runtime.GOOS, FgHome: FgHome, LogLevel: LogLevel, Interactor: &logger.DefaultInteractionHandler{}}
 }
 
 func IsVersionDeppendant(commandName string) bool {
