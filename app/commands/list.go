@@ -36,14 +36,29 @@ func (h *ListCmd) Run(args []string) error {
 }
 
 func (h *ListCmd) listVersionsFromFgHome(fgHome string) error {
-	if _, err := os.Stat(fgHome); os.IsNotExist(err) {
-		h.Ctx.Interactor.Info("Nenhuma versão instalada. Diretório principal não existe.")
+	versions, err := h.GetVersionsFromFgHome(fgHome)
+	if err != nil {
+		return err
+	}
+
+	if len(versions) == 0 {
+		h.Ctx.Interactor.Info("Nenhuma versão instalada.")
 		return nil
+	}
+
+	h.SetActiveVersion(versions)
+	h.DisplayVersionInfo(versions)
+	return nil
+}
+
+func (h *ListCmd) GetVersionsFromFgHome(fgHome string) ([]VersionInfo, error) {
+	if _, err := os.Stat(fgHome); os.IsNotExist(err) {
+		return []VersionInfo{}, nil
 	}
 
 	entries, err := os.ReadDir(fgHome)
 	if err != nil {
-		return fmt.Errorf("erro ao ler diretório principal: %v", err)
+		return nil, fmt.Errorf("erro ao ler diretório principal: %v", err)
 	}
 
 	var versions []VersionInfo
@@ -59,21 +74,14 @@ func (h *ListCmd) listVersionsFromFgHome(fgHome string) error {
 		}
 
 		versionPath := filepath.Join(fgHome, versionName)
-		versionInfo := h.createVersionInfo(versionPath, versionName)
+		versionInfo := h.CreateVersionInfo(versionPath, versionName)
 		versions = append(versions, versionInfo)
 	}
 
-	if len(versions) == 0 {
-		h.Ctx.Interactor.Info("Nenhuma versão instalada.")
-		return nil
-	}
-
-	h.setActiveVersion(versions)
-	h.displayVersionInfo(versions)
-	return nil
+	return versions, nil
 }
 
-func (h *ListCmd) createVersionInfo(versionPath, versionName string) VersionInfo {
+func (h *ListCmd) CreateVersionInfo(versionPath, versionName string) VersionInfo {
 	dirInfo, err := os.Stat(versionPath)
 	installDate := time.Now()
 	if err == nil {
@@ -87,7 +95,7 @@ func (h *ListCmd) createVersionInfo(versionPath, versionName string) VersionInfo
 	}
 }
 
-func (h *ListCmd) setActiveVersion(versions []VersionInfo) {
+func (h *ListCmd) SetActiveVersion(versions []VersionInfo) {
 	if len(versions) == 0 {
 		return
 	}
@@ -103,7 +111,27 @@ func (h *ListCmd) setActiveVersion(versions []VersionInfo) {
 	versions[0].IsActive = true
 }
 
-func (h *ListCmd) displayVersionInfo(versions []VersionInfo) {
+func (h *ListCmd) GetLatestVersion(fgHome string) (string, error) {
+	versions, err := h.GetVersionsFromFgHome(fgHome)
+	if err != nil {
+		return "", err
+	}
+
+	if len(versions) == 0 {
+		return "", fmt.Errorf("nenhuma versão instalada")
+	}
+
+	h.SetActiveVersion(versions)
+	for _, v := range versions {
+		if v.IsActive {
+			return v.Version, nil
+		}
+	}
+
+	return versions[0].Version, nil
+}
+
+func (h *ListCmd) DisplayVersionInfo(versions []VersionInfo) {
 	h.Ctx.Interactor.Info("=== Informações das Versões Instaladas ===")
 
 	sort.Slice(versions, func(i, j int) bool {
